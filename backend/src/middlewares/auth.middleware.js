@@ -5,7 +5,7 @@ export const authMiddleware = async (req, res, next) => {
   try {
     const token = req.cookies.jwt;
     if (!token) {
-      res.status(401).json({
+      return res.status(401).json({
         message: "Unauthorized user - No token provided",
       });
     }
@@ -16,7 +16,7 @@ export const authMiddleware = async (req, res, next) => {
       decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     } catch (error) {
       console.error("Error in verifying jwt: ", error);
-      res.status(401).json({
+      return res.status(401).json({
         message: "Unauthorized user - Invalid token",
       });
     }
@@ -33,7 +33,7 @@ export const authMiddleware = async (req, res, next) => {
     });
 
     if (!existingUser) {
-      res.status(404).json({
+      return res.status(404).json({
         message: "User not found",
       });
     }
@@ -42,8 +42,21 @@ export const authMiddleware = async (req, res, next) => {
     next();
   } catch (error) {
     console.error("Error authenticating user: ", error);
-    res.status(500).json({
+    return res.status(500).json({
       message: "Error authenticating user",
     });
+  }
+};
+
+export const checkAdmin = async (req, res, next) => {
+  try {
+    const role = req.existingUser.role;
+    if (role !== "ADMIN") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    next();
+  } catch (error) {
+    console.error("Error checking admin role:", error);
+    return res.status(500).json({ message: "Error checking admin role" });
   }
 };
