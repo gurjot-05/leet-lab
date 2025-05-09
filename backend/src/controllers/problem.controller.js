@@ -1,4 +1,12 @@
-export const createProblem = async (req, res) => {};
+import {db} from "../libs/db.js"
+ 
+export const createProblem = async (req, res) => {
+    try {
+         
+    } catch (error) {
+        
+    }
+};
 
 export const getAllProblems = async (req, res) => {};
 
