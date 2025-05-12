@@ -16,14 +16,16 @@ export const submitBatch = async (submissions) => {
       submissions,
     }
   );
+  return data;
 };
+
 const sleep = (seconds) => {
   return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 };
 
 export const pollBatchResults = async (tokens) => {
   while (true) {
-    const data = await axios.get(
+    const { data } = await axios.get(
       `${process.env.JUDGE0_API_URL}/submissions/batch`,
       {
         params: {
@@ -35,9 +37,9 @@ export const pollBatchResults = async (tokens) => {
 
     const results = data.submissions;
 
-    const isAllDone = results.every((result) => {
-      result.status.id !== 1 && result.status.id !== 2;
-    });
+    const isAllDone = results.every(
+      (result) => result.status.id !== 1 && result.status.id !== 2
+    );
 
     if (isAllDone) return results;
     await sleep(1);
