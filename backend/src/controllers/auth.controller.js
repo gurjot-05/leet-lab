@@ -140,3 +140,43 @@ export const check = async (req, res) => {
     });
   }
 };
+
+export const makeAdmin = async (req, res) => {
+  const { id } = req.existingUser;
+
+  try {
+    const updatedUser = await db.user.update({
+      where: { id },
+
+      data: {
+        role: UserRole.ADMIN,
+      },
+
+      select: {
+        id: true,
+
+        email: true,
+
+        name: true,
+
+        role: true,
+
+        image: true,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+
+      message: "User role updated successfully",
+
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Error in making admin:", error);
+
+    return res.status(500).json({
+      message: "Error in making admin",
+    });
+  }
+};
