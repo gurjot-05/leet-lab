@@ -152,6 +152,23 @@ export const updateProblem = async (req, res) => {
   }
 };
 
-export const deleteProblem = async (req, res) => {};
+export const deleteProblem = async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    const deletedProblem = await db.problem.delete({
+      where: { id },
+    });
+    return res.status(200).json({
+      success: true,
+      message: "Problem deleted successfully",
+      problem: deletedProblem,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: `Error occurred: ${error}`,
+    });
+  }
+};
 
 export const getAllProblemsSolvedByUser = async (req, res) => {};
