@@ -131,7 +131,26 @@ export const getProblemById = async (req, res) => {
   }
 };
 
-export const updateProblem = async (req, res) => {};
+export const updateProblem = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const updatedData = req.body;
+
+    const updatedProblem = await db.problem.update({
+      where: { id },
+      data: updatedData,
+    });
+    return res.status(200).json({
+      success: true,
+      message: "Problem updated successfully",
+      problem: updatedProblem,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: `Error occurred: ${error}`,
+    });
+  }
+};
 
 export const deleteProblem = async (req, res) => {};
 
