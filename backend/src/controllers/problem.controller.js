@@ -19,12 +19,6 @@ export const createProblem = async (req, res) => {
       referrenceSolutions,
     } = req.body;
 
-    if (req.existingUser.role !== "ADMIN") {
-      return res
-        .status(403)
-        .json({ message: "You are not allowed to create a problem" });
-    }
-
     try {
       for (const [language, solutionCode] of Object.entries(
         referrenceSolutions
@@ -52,7 +46,7 @@ export const createProblem = async (req, res) => {
 
         for (let i = 0; i < results.length; i++) {
           const result = results[i];
-          console.log(result);
+
           if (result.status.id !== 3) {
             return res.status(400).json({
               message: `Testcases ${i + 1} failed for language ${language}`,
@@ -61,22 +55,26 @@ export const createProblem = async (req, res) => {
         }
       }
       const newProblem = await db.problem.create({
-        title,
-        description,
-        difficulty,
-        tags,
-        examples,
-        constraints,
-        testcases,
-        codeSnippets,
-        referrenceSolutions,
-        userID: req.existingUser.id,
+        data: {
+          title,
+          description,
+          difficulty,
+          tags,
+          examples,
+          constraints,
+          testcases,
+          codeSnippets,
+          referrenceSolutions,
+          userId: req.existingUser.id,
+        },
       });
 
       return res.status(201).json({
-        message: `New problem solved successfully: ${newProblem}`,
+        message: "New problem created successfully",
+        problem: newProblem,
       });
     } catch (error) {
+      console.log(error);
       return res.status(500).json({
         message: `Error while creating problem: ${error}`,
       });
@@ -88,7 +86,9 @@ export const createProblem = async (req, res) => {
   }
 };
 
-export const getAllProblems = async (req, res) => {};
+export const getAllProblems = async (req, res) => {
+
+};
 
 export const getProblemById = async (req, res) => {};
 

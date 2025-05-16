@@ -14,6 +14,11 @@ export const submitBatch = async (submissions) => {
     `${process.env.JUDGE0_API_URL}/submissions/batch?base64_encoded=false`,
     {
       submissions,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.JUDGE0_AUTH_TOKEN}`,
+      },
     }
   );
   return data;
@@ -26,11 +31,16 @@ const sleep = (seconds) => {
 export const pollBatchResults = async (tokens) => {
   while (true) {
     const { data } = await axios.get(
-      `${process.env.JUDGE0_API_URL}/submissions/batch`,
+      `${process.env.JUDGE0_API_URL}/submissions/batch?base64_encoded=false`,
       {
         params: {
           tokens: tokens.join(","),
           base64_encoded: false,
+        },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.JUDGE0_AUTH_TOKEN}`,
         },
       }
     );
