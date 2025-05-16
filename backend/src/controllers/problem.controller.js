@@ -70,6 +70,7 @@ export const createProblem = async (req, res) => {
       });
 
       return res.status(201).json({
+        success: true,
         message: "New problem created successfully",
         problem: newProblem,
       });
@@ -87,10 +88,27 @@ export const createProblem = async (req, res) => {
 };
 
 export const getAllProblems = async (req, res) => {
-
+  try {
+    const allProblems = await db.problem.findMany();
+    if (!allProblems) {
+      return res.status(404).json({
+        message: "No problems found",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      problems: allProblems,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: `Error occurred: ${error}`,
+    });
+  }
 };
 
-export const getProblemById = async (req, res) => {};
+export const getProblemById = async (req, res) => { 
+  
+};
 
 export const updateProblem = async (req, res) => {};
 
