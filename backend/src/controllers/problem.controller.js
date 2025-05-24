@@ -140,6 +140,11 @@ export const updateProblem = async (req, res) => {
       where: { id },
       data: updatedData,
     });
+    if (!updatedProblem) {
+      return res.status(404).json({
+        message: "Problem not found",
+      });
+    }
     return res.status(200).json({
       success: true,
       message: "Problem updated successfully",
@@ -159,6 +164,11 @@ export const deleteProblem = async (req, res) => {
     const deletedProblem = await db.problem.delete({
       where: { id },
     });
+    if (!deletedProblem) {
+      return res.status(404).json({
+        message: "Problem not found",
+      });
+    }
     return res.status(200).json({
       success: true,
       message: "Problem deleted successfully",
