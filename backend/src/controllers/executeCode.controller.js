@@ -113,6 +113,7 @@ export const executeCode = async (req, res) => {
           ? JSON.stringify(results.map((r) => r.stdout))
           : null,
         compileOutput: compileOutput,
+        stderr: stderrOutput,
         status: submissionStatus,
         memory: String(totalMemoryConsumed),
         time: String(totalTimeTaken),
@@ -124,6 +125,7 @@ export const executeCode = async (req, res) => {
       },
     });
 
+    let errorMessage = "";
     if (!allTestCasesPassed) {
       const failedTestCase = testCaseResultsToCreate.find((tc) => !tc.passed);
 
@@ -172,8 +174,9 @@ export const executeCode = async (req, res) => {
       status: submissionStatus,
     });
   } catch (error) {
+    console.error(`Error occurred while executing the problem: ${error}`);
     return res.status(500).json({
-      message: `Error occurred: ${error}`,
+      message: `Error occurred while executing the problem`,
     });
   }
 };

@@ -4,9 +4,13 @@ import { UserRole } from "../generated/prisma/index.js";
 import jwt from "jsonwebtoken";
 
 export const register = async (req, res) => {
-  const { email, password, name } = req.body;
-
   try {
+    const { email, password, name } = req.body;
+
+    if (!email || !password || !name) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
     const existingUser = await db.user.findUnique({ where: { email } });
 
     if (existingUser) {
@@ -45,7 +49,7 @@ export const register = async (req, res) => {
         email: newUser.email,
         name: newUser.name,
         role: newUser.role,
-        image: newUser.image,
+        image: newUser.image ?? null,
       },
     });
   } catch (error) {
@@ -57,14 +61,18 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  const { email, password } = req.body;
-
   try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
     const existingUser = await db.user.findUnique({
       where: { email },
     });
     if (!existingUser) {
-      res.status(401).json({
+      return res.status(401).json({
         error: "User not registered",
       });
     }
@@ -72,7 +80,7 @@ export const login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, existingUser.password);
 
     if (!isMatch) {
-      res.status(401).json({
+      return res.status(401).json({
         error: "Wrong email or password",
       });
     }
@@ -142,41 +150,43 @@ export const check = async (req, res) => {
 };
 
 export const makeAdmin = async (req, res) => {
-  const { id } = req.existingUser;
-
   try {
+    const { userId } = req.body; 
+    const requesterId = req.existingUser.id;
+
+    if (!userId) {
+      return res.status(400).json({
+        message: "Target user ID is required.",
+      });
+    }
+
+    if (userId === requesterId) {
+      return res.status(400).json({
+        message: "You cannot promote yourself.",
+      });
+    }
+
     const updatedUser = await db.user.update({
-      where: { id },
-
-      data: {
-        role: UserRole.ADMIN,
-      },
-
+      where: { id: userId },
+      data: { role: UserRole.ADMIN },
       select: {
         id: true,
-
         email: true,
-
         name: true,
-
         role: true,
-
         image: true,
       },
     });
 
     return res.status(200).json({
       success: true,
-
-      message: "User role updated successfully",
-
+      message: "User promoted to admin successfully.",
       user: updatedUser,
     });
   } catch (error) {
-    console.error("Error in making admin:", error);
-
+    console.error("Error promoting user to admin:", error);
     return res.status(500).json({
-      message: "Error in making admin",
+      message: "Error promoting user to admin.",
     });
   }
 };

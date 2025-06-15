@@ -1,8 +1,8 @@
 import { db } from "../libs/db.js";
 
 export const getAllPlaylists = async (req, res) => {
-  const userId = req.existingUser.id;
   try {
+    const userId = req.existingUser.id;
     const playlists = await db.playlist.findMany({
       where: {
         userId,
@@ -28,8 +28,9 @@ export const getAllPlaylists = async (req, res) => {
       playlists,
     });
   } catch (error) {
+    console.error(`Failed to fetch playlists: ${error}`);
     return res.status(500).json({
-      message: `Failed to fetch playlists: ${error}`,
+      message: `Failed to fetch playlists`,
     });
   }
 };
@@ -38,7 +39,7 @@ export const getOnePlaylist = async (req, res) => {
   try {
     const playlistId = req.params.playlistId;
 
-    const playlists = await db.playlist.findUnique({
+    const playlist = await db.playlist.findUnique({
       where: {
         id: playlistId,
       },
@@ -51,7 +52,7 @@ export const getOnePlaylist = async (req, res) => {
       },
     });
 
-    if (!playlists) {
+    if (!playlist) {
       return res.status(404).json({
         message: "No playlist found",
       });
@@ -60,11 +61,12 @@ export const getOnePlaylist = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Playlist fetched successfully",
-      playlists,
+      playlist,
     });
   } catch (error) {
+    console.error(`Failed to fetch playlist: ${error}`);
     return res.status(500).json({
-      message: `Failed to fetch playlist: ${error}`,
+      message: `Failed to fetch playlist`,
     });
   }
 };
@@ -88,8 +90,16 @@ export const createPlaylist = async (req, res) => {
       playlist,
     });
   } catch (error) {
+    console.error(`Failed to create playlist: ${error}`);
+
+    if (error.code === "P2002") {
+      return res.status(400).json({
+        message: "You already have a playlist with this name.",
+      });
+    }
+
     return res.status(500).json({
-      message: `Failed to create playlist: ${error}`,
+      message: `Failed to create playlist`,
     });
   }
 };
@@ -105,10 +115,17 @@ export const addProblemToPlaylist = async (req, res) => {
       });
     }
     const problems = await db.problemsinPlaylist.createMany({
-      data: problemIds.map((problemId) => {
-        playlistId, problemId;
-      }),
+      data: problemIds.map((problemId) => ({
+        playlistId,
+        problemId,
+      })),
     });
+
+    if (!problems) {
+      return res.status(404).json({
+        message: "Playlist or problems not found",
+      });
+    }
 
     return res.status(201).json({
       success: true,
@@ -116,8 +133,9 @@ export const addProblemToPlaylist = async (req, res) => {
       problems,
     });
   } catch (error) {
+    console.error(`Failed to add problems: ${error}`);
     return res.status(500).json({
-      message: `Failed to add problem: ${error}`,
+      message: `Failed to add problems`,
     });
   }
 };
@@ -132,13 +150,14 @@ export const deletePlaylist = async (req, res) => {
       },
     });
 
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
       message: "Playlist deleted successfully",
     });
   } catch (error) {
+    console.error(`Failed to delete playlist: ${error}`);
     return res.status(500).json({
-      message: `Failed to delete playlist: ${error}`,
+      message: `Failed to delete playlist`,
     });
   }
 };
@@ -168,8 +187,9 @@ export const removeProblemFromPlaylist = async (req, res) => {
       message: "Problem deleted successfully",
     });
   } catch (error) {
+    console.error(`Failed to delete problems from the playlist: ${error}`);
     return res.status(500).json({
-      message: `Failed to delete problem: ${error}`,
+      message: `Failed to delete problems from the playlist`,
     });
   }
 };

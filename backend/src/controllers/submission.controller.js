@@ -16,8 +16,9 @@ export const getAllSubmissions = async (req, res) => {
       submissions,
     });
   } catch (error) {
+    console.error(`Failed to fetch submissions: ${error}`);
     return res.status(500).json({
-      message: `Failed to fetch submissions: ${error}`,
+      message: `Failed to fetch submissions`,
     });
   }
 };
@@ -41,8 +42,9 @@ export const getSubmissionsForProblem = async (req, res) => {
       submissions,
     });
   } catch (error) {
+    console.error(`Failed to fetch submissions: ${error}`);
     return res.status(500).json({
-      message: `Failed to fetch submissions: ${error}`,
+      message: `Failed to fetch submissions`,
     });
   }
 };
@@ -51,7 +53,7 @@ export const getSubmissionsCount = async (req, res) => {
   try {
     const problemId = req.params.problemId;
 
-    const submissions = await db.submission.findMany({
+    const count = await db.submission.count({
       where: {
         problemId: problemId,
       },
@@ -60,11 +62,12 @@ export const getSubmissionsCount = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Number of submissions fetched successfully",
-      count: submissions.length,
+      count,
     });
   } catch (error) {
+    console.error(`Failed to fetch submission count: ${error}`);
     return res.status(500).json({
-      message: `Failed to fetch count: ${error}`,
+      message: `Failed to fetch submission count`,
     });
   }
 };
