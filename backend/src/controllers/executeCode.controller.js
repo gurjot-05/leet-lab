@@ -80,6 +80,8 @@ export const executeCode = async (req, res) => {
 
       if (!testCasePassed) {
         allTestCasesPassed = false;
+        submissionStatus = "Wrong Answer";
+
         if (result.status.id === 6) {
           submissionStatus = "Compilation Error";
           compileOutput = result.compile_output;
@@ -129,6 +131,11 @@ export const executeCode = async (req, res) => {
     if (!allTestCasesPassed) {
       const failedTestCase = testCaseResultsToCreate.find((tc) => !tc.passed);
 
+      const submissionWithTestCases = await db.submission.findUnique({
+        where: { id: newSubmission.id },
+        include: { testCases: true },
+      });
+
       if (failedTestCase) {
         if (failedTestCase.status === "Compilation Error") {
           errorMessage = `Compilation Error: ${
@@ -143,12 +150,15 @@ export const executeCode = async (req, res) => {
             failedTestCase.testCase
           } failed: Runtime Error. ${failedTestCase.stderr || ""}`;
         } else {
-          errorMessage = `Testcase ${failedTestCase.testCase} failed. Expected "${failedTestCase.expected}", but got "${failedTestCase.stdout}". Status: ${failedTestCase.status}`;
+          errorMessage = `Testcase ${failedTestCase.testCase} failed`;
         }
       }
       return res.status(400).json({
         message: errorMessage,
         status: submissionStatus,
+        time: parseFloat(totalTimeTaken.toFixed(2)),
+        memory: parseFloat((totalMemoryConsumed / (1024 * 1024)).toFixed(2)),
+        submission: submissionWithTestCases,
       });
     }
 
@@ -166,12 +176,17 @@ export const executeCode = async (req, res) => {
       },
     });
 
+    const submissionWithTestCases = await db.submission.findUnique({
+      where: { id: newSubmission.id },
+      include: { testCases: true },
+    });
+
     return res.status(200).json({
       message: "Problem solved successfully!",
-      time: parseFloat(totalTimeTaken.toFixed(1)),
-      memory: parseFloat((totalMemoryConsumed / 1024).toFixed(1)),
-      submissionId: newSubmission.id,
+      time: parseFloat(totalTimeTaken.toFixed(2)),
+      memory: parseFloat((totalMemoryConsumed / (1024 * 1024)).toFixed(2)),
       status: submissionStatus,
+      submission: submissionWithTestCases,
     });
   } catch (error) {
     console.error(`Error occurred while executing the problem: ${error}`);

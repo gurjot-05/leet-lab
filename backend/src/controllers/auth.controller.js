@@ -8,14 +8,14 @@ export const register = async (req, res) => {
     const { email, password, name } = req.body;
 
     if (!email || !password || !name) {
-      return res.status(400).json({ error: "All fields are required" });
+      return res.status(400).json({ message: "All fields are required" });
     }
 
     const existingUser = await db.user.findUnique({ where: { email } });
 
     if (existingUser) {
       return res.status(400).json({
-        error: "User already exists",
+        message: "User already exists",
       });
     }
 
@@ -43,7 +43,7 @@ export const register = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: "User created successfully",
+      message: "User registered successfully",
       user: {
         id: newUser.id,
         email: newUser.email,
@@ -53,9 +53,9 @@ export const register = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error in creating a user: ", error);
+    console.error("Error in registering the user: ", error);
     res.status(500).json({
-      message: "Error in creating a user",
+      message: "Error in registering the user",
     });
   }
 };
@@ -65,7 +65,7 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ error: "All fields are required" });
+      return res.status(400).json({ message: "All fields are required" });
     }
 
     const existingUser = await db.user.findUnique({
@@ -73,7 +73,7 @@ export const login = async (req, res) => {
     });
     if (!existingUser) {
       return res.status(401).json({
-        error: "User not registered",
+        message: "User not registered",
       });
     }
 
@@ -81,7 +81,7 @@ export const login = async (req, res) => {
 
     if (!isMatch) {
       return res.status(401).json({
-        error: "Wrong email or password",
+        message: "Wrong email or password",
       });
     }
 
@@ -151,7 +151,7 @@ export const check = async (req, res) => {
 
 export const makeAdmin = async (req, res) => {
   try {
-    const { userId } = req.body; 
+    const { userId } = req.body;
     const requesterId = req.existingUser.id;
 
     if (!userId) {

@@ -86,7 +86,15 @@ export const createProblem = async (req, res) => {
 
 export const getAllProblems = async (req, res) => {
   try {
-    const allProblems = await db.problem.findMany();
+    const allProblems = await db.problem.findMany({
+      include: {
+        solvedBy: {
+          select: {
+            userId: true,
+          },
+        },
+      },
+    });
 
     if (allProblems.length === 0) {
       return res.status(404).json({

@@ -119,6 +119,7 @@ export const addProblemToPlaylist = async (req, res) => {
         playlistId,
         problemId,
       })),
+      skipDuplicates: true,
     });
 
     if (!problems) {
